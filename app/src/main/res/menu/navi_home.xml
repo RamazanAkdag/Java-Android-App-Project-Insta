@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+
+    <!--<group android:checkableBehavior="single">
+        <item android:id="@+id/nav_camera"
+            android:icon="@drawable/camera_icon"
+            android:title="Import"></item>
+        <item android:id="@+id/nav_gallery"
+            android:icon="@drawable/gallery_icon"
+            android:title="Gallery"></item>
+
+    </group>-->
+
+    <item android:title="Social" >
+        <menu>
+            <item
+                android:id="@+id/nav_add_post"
+                android:icon="@drawable/share_icon"
+                android:title="Add Post" />
+
+            <item
+                android:id="@+id/nav_send"
+                android:icon="@drawable/send_icon"
+                android:title="Send" />
+
+
+        </menu>
+
+    </item>
+    <item
+        android:id="@+id/nav_logout"
+        android:icon="@drawable/logout_icon"
+        android:title="Log Out">
+
+    </item>
+
+
+</menu>

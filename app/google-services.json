@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "970655755078",
+    "project_id": "mobileproject-5e992",
+    "storage_bucket": "mobileproject-5e992.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:970655755078:android:2880fe32debfe33a3e5347",
+        "android_client_info": {
+          "package_name": "com.example.chatinstablog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcOJxZUs4GZ8tWlsq4MyvITCLA_7VW1GU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

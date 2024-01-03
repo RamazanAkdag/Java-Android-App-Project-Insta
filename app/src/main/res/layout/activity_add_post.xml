@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".Activities.AddPostActivity">
+
+    <!-- Gönderi Görseli İçin ImageView ve ImageOverlay -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_home"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/action_bar_blue"
+        app:title="Gönderi Paylaş"
+        app:titleTextColor="@android:color/white" />
+
+    <FrameLayout
+        android:id="@+id/frameLayoutAddPost"
+        android:layout_width="match_parent"
+        android:layout_height="300dp">
+
+        <!-- ImageView -->
+        <ImageView
+            android:id="@+id/imageViewPost"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            />
+
+        <!-- ImageOverlay -->
+        <FrameLayout
+            android:id="@+id/frameLayoutImageOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="297dp"
+            android:background="?android:attr/selectableItemBackground">
+
+            <!-- İkon veya simge -->
+            <ImageView
+                android:id="@+id/imageViewAddPostIcon"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:src="@drawable/add_photo_icon" />
+
+        </FrameLayout>
+
+    </FrameLayout>
+
+    <!-- Gönderi Açıklaması İçin EditText -->
+    <EditText
+        android:id="@+id/editTextDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Gönderi açıklamasını girin"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Gönderi Paylaşma Butonu -->
+    <Button
+        android:id="@+id/buttonSharePost"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Paylaş"
+        android:layout_gravity="center"/>
+
+</LinearLayout>
