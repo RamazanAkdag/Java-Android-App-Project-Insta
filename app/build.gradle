@@ -9,7 +9,6 @@ android {
     namespace 'com.example.chatinstablog'
     compileSdk 34
 
-
     defaultConfig {
         applicationId "com.example.chatinstablog"
         minSdk 24

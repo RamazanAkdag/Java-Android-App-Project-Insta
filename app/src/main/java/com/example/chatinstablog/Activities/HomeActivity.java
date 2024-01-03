@@ -108,6 +108,7 @@ public class HomeActivity extends AppCompatActivity {
                         for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
 
                                 Post post = documentSnapshot.toObject(Post.class);
+                                post.id = documentSnapshot.getId();
 
                                 posts.add(post);
 
