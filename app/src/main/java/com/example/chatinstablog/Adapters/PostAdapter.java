@@ -1,36 +1,48 @@
 package com.example.chatinstablog.Adapters;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.chatinstablog.Models.LikeView;
 import com.example.chatinstablog.Models.Post;
+import com.example.chatinstablog.Models.User;
 import com.example.chatinstablog.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
 
-
+    Context context;
     FirebaseAuth firebaseAuth;
     FirebaseFirestore db;
     FirebaseUser currentUser;
@@ -44,6 +56,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @Override
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recyclerview_post_item, parent, false);
+        context = parent.getContext();
         firebaseAuth = FirebaseAuth.getInstance();
         currentUser = firebaseAuth.getCurrentUser();
         db = FirebaseFirestore.getInstance();
@@ -106,6 +119,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                     }
                 });
 
+                holder.textViewLikes.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        int updatedPosition = holder.getAdapterPosition();
+
+                        showLikesDialog(updatedPosition);
+
+                    }
+                });
 
 
 
@@ -157,6 +179,148 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         }
     }
+
+
+    /*public void showLikesDialog(int position){
+        // Tıklanan postun likes listesini alma
+        Post post = posts.get(position);
+
+        // Tablolara referans
+        CollectionReference likesRef = db.collection("Likes");
+        CollectionReference usersRef = db.collection("Users");
+
+        // Postu beğenen kullanıcılar
+        Query query = likesRef.whereEqualTo("PostId", post.id);
+
+        List<LikeView> likeViews = new ArrayList<>();
+        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    //her bir like ın kullanıcısını alacağız
+                    for (QueryDocumentSnapshot likeSnapshot : task.getResult()) {
+                        // Kullanıcı id
+                        String userId = likeSnapshot.get("UserId",String.class);
+
+
+                        //kullanıcıyı çekme
+                        DocumentReference userRef = usersRef.document(userId);
+                        userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    // Kullanıcıyı listeye ekle
+                                    DocumentSnapshot userSnapshot = task.getResult();
+                                    User user = userSnapshot.toObject(User.class);
+
+                                    LikeView likeView = new LikeView(user.ProfileImgUrl, user.UserName);
+                                    likeViews.add(likeView);//en üst for döngüsü bitince kullanıcıları setleyeceğim fakat nasıl yapacağım
+
+
+                                }
+                            }
+                        });
+                    }
+
+                    // Tüm işlemler bitince yapılacak işlemler
+                    if (task.isSuccessful()) {
+
+                        // Dialog'u oluştur
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        builder.setTitle("Beğenen Kişiler");
+
+                        // RecyclerView oluştur
+                        RecyclerView recyclerView = new RecyclerView(context);
+                        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
+                        // Adapter oluştur
+                        LikesAdapter adapter = new LikesAdapter(likeViews);
+
+
+
+                        // RecyclerView'e adapter'ı setle
+                        recyclerView.setAdapter(adapter);
+
+                        // RecyclerView'i dialog'a setle
+                        builder.setView(recyclerView);
+                        builder.show();
+                    }
+
+                }
+
+
+            }
+        });
+
+
+
+
+
+
+
+
+
+    }*/
+
+    public void showLikesDialog(int position) {
+        Post post = posts.get(position);
+
+        CollectionReference likesRef = db.collection("Likes");
+        CollectionReference usersRef = db.collection("Users");
+
+        Query query = likesRef.whereEqualTo("PostId", post.id);
+
+        query.get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<LikeView> likeViews = new ArrayList<>();
+
+                    for (QueryDocumentSnapshot likeSnapshot : queryDocumentSnapshots) {
+                        String userId = likeSnapshot.getString("UserId");
+
+                        DocumentReference userRef = usersRef.document(userId);
+
+                        userRef.get()
+                                .addOnSuccessListener(userSnapshot -> {
+                                    User user = userSnapshot.toObject(User.class);
+
+                                    if (user != null) {
+                                        LikeView likeView = new LikeView(user.ProfileImgUrl, user.UserName);
+                                        likeViews.add(likeView);
+                                    }
+
+                                    if (likeViews.size() == queryDocumentSnapshots.size()) {
+                                        // Tüm işlemler tamamlandığında yapılacak işlemler
+                                        showLikesDialog(likeViews);
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+
+                });
+    }
+
+    private void showLikesDialog(List<LikeView> likeViews) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Beğenen Kişiler");
+
+        RecyclerView recyclerView = new RecyclerView(context);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
+        LikesAdapter adapter = new LikesAdapter(likeViews);
+        recyclerView.setAdapter(adapter);
+
+        builder.setView(recyclerView);
+        builder.show();
+    }
+
+
+
+
+
 
     public void onLikeClicked(int position){
         Post post = posts.get(position);

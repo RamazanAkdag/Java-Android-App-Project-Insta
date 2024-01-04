@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginVertical="5dp"
+    android:orientation="vertical"
+
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp">
+        <ImageView
+            android:id="@+id/imageViewLikesLike"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/like_icon"
+            android:layout_marginStart="5dp"
+            android:layout_gravity="center"
+            app:tint="@color/red"
+            />
+
+        <!-- Profil fotoğrafı -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:cardCornerRadius="24dp"
+            android:layout_marginStart="20dp"
+
+            >
+
+            <ImageView
+                android:id="@+id/imageViewLikesProfile"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/logout_icon"
+                android:scaleType="centerCrop"
+                />
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/textViewLikesUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="20dp"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:text="ramo"></TextView>
+    </LinearLayout>
+
+
+
+
+</LinearLayout>
