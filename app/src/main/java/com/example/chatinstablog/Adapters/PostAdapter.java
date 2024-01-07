@@ -269,11 +269,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         CollectionReference usersRef = db.collection("Users");
 
         Query query = likesRef.whereEqualTo("PostId", post.id);
-
+        //begenen herkesi getiriyoruz
         query.get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<LikeView> likeViews = new ArrayList<>();
-
+                    //queryDocumentSnapshots.size kadar kişi beğenmiş
+                    System.out.println("queryDocumentSnapshots sayisi : " + queryDocumentSnapshots.size());
                     for (QueryDocumentSnapshot likeSnapshot : queryDocumentSnapshots) {
                         String userId = likeSnapshot.getString("UserId");
 
@@ -282,15 +283,19 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                         userRef.get()
                                 .addOnSuccessListener(userSnapshot -> {
                                     User user = userSnapshot.toObject(User.class);
-
+                                    System.out.println("begenen kullanici : " + user);
                                     if (user != null) {
                                         LikeView likeView = new LikeView(user.ProfileImgUrl, user.UserName);
                                         likeViews.add(likeView);
                                     }
 
+                                    //System.out.println("Likeviews sayısı  : "+likeViews.size() );
+
+                                    //kullanıcıların sayısı likeviewse eşitse
                                     if (likeViews.size() == queryDocumentSnapshots.size()) {
                                         // Tüm işlemler tamamlandığında yapılacak işlemler
-                                        showLikesDialog(likeViews);
+                                        System.out.println("Fonksiyon dialog cagiriliyor");
+                                        createLikesDialog(likeViews);
                                     }
                                 })
                                 .addOnFailureListener(e -> {
@@ -303,20 +308,22 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 });
     }
 
-    private void showLikesDialog(List<LikeView> likeViews) {
+    private void createLikesDialog(List<LikeView> likeViews) {
+        System.out.println("Like Dialog oluşturuluyor");
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Beğenen Kişiler");
 
         RecyclerView recyclerView = new RecyclerView(context);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
+
         LikesAdapter adapter = new LikesAdapter(likeViews);
         recyclerView.setAdapter(adapter);
 
         builder.setView(recyclerView);
         builder.show();
+        System.out.println("Like dialog oluşturuldu");
     }
-
 
 
 
