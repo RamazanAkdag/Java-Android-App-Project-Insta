@@ -1,25 +1,32 @@
 package com.example.chatinstablog.Adapters;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.chatinstablog.Models.Comment;
+import com.example.chatinstablog.Models.CommentsDialog;
 import com.example.chatinstablog.Models.LikeView;
 import com.example.chatinstablog.Models.Post;
 import com.example.chatinstablog.Models.User;
 import com.example.chatinstablog.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,6 +41,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,15 +104,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                             .into(holder.imageViewPost);
 
                     //beğeni balonunun renklerini ayarla
-                    isPostLikedByCurrentUser(holder.getAdapterPosition(),holder);
+                    isPostLikedByCurrentUser(holder.getAdapterPosition(), holder);
 
                     holder.textViewDescription.setText(post.description);
 
-                    holder.textViewComments.setText(String.valueOf(post.commentsCount) );
+                    holder.textViewComments.setText(String.valueOf(post.commentsCount));
                     holder.textViewLikes.setText(String.valueOf(post.likesCount));
 
-                }
-                catch (Exception e){
+                } catch (Exception e) {
                     System.out.println(e.getLocalizedMessage());
                 }
                 holder.imageViewLike.setOnClickListener(new View.OnClickListener() {
@@ -128,8 +135,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
                     }
                 });
-
-
+                holder.imageViewComment.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Yorumları gösteren bir diyalog penceresi oluştur
+                        int position = holder.getAdapterPosition();
+                        showCommentsDialog(position);
+                    }
+                });
 
 
 
@@ -137,6 +150,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
 
         });
+
 
     }
 
@@ -318,11 +332,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     }
 
 
-
-
-
-
-    public void onLikeClicked(int position){
+    public void onLikeClicked(int position) {
         Post post = posts.get(position);
         System.out.println(post + " like basildi");
 
@@ -331,11 +341,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         String currentUserId = currentUser.getUid();
 
 
-
         // Kullanıcının bu postu zaten beğenip beğenmediğini kontrol et
         db.collection("Likes")
                 .whereEqualTo("PostId", post.id)
-                .whereEqualTo("UserId", currentUserId)
+                .whereEqualTo("UserId", currentUserId).orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -352,7 +361,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                                 db.collection("Posts").document(post.id).update(updates).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()){
+                                        if (task.isSuccessful()) {
                                             // Likes tablosuna kaydet
                                             Map<String, Object> likeData = new HashMap<>();
                                             likeData.put("PostId", post.id);
@@ -361,10 +370,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                                             db.collection("Likes").add(likeData).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<DocumentReference> task) {
-                                                    if (task.isSuccessful()){
+                                                    if (task.isSuccessful()) {
                                                         System.out.println("begenme basariliiii");
 
-                                                        System.out.println("new like count : "+post.likesCount);
+                                                        System.out.println("new like count : " + post.likesCount);
                                                         notifyItemChanged(position);
                                                     }
                                                 }
@@ -373,10 +382,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                                         }
                                     }
                                 });
-
-
-
-
 
 
                             } else {
@@ -393,38 +398,76 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     }
 
 
+    public void isPostLikedByCurrentUser(int position, PostViewHolder holder) {
 
-    public void isPostLikedByCurrentUser(int position,PostViewHolder holder){
-
-            Post post = posts.get(position);
+        Post post = posts.get(position);
 
 
-            String currentUserId = currentUser.getUid();
-            // Kullanıcının bu postu beğendiğini kontrol et
-            db.collection("Likes")
-                    .whereEqualTo("PostId", post.id)
-                    .whereEqualTo("UserId", currentUserId)
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                if (task.getResult().isEmpty()) {
-                                    // Kullanıcı bu postu henüz beğenmemiş
+        String currentUserId = currentUser.getUid();
+        // Kullanıcının bu postu beğendiğini kontrol et
+        db.collection("Likes")
+                .whereEqualTo("PostId", post.id)
+                .whereEqualTo("UserId", currentUserId)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            if (task.getResult().isEmpty()) {
+                                // Kullanıcı bu postu henüz beğenmemiş
 
-                                } else {
-                                    // Kullanıcı bu postu beğenmiş
-                                    holder.imageViewLike.setColorFilter(Color.RED);
-                                }
                             } else {
-                                // Hata oluştu
-                                System.out.println("Hata: " + task.getException());
+                                // Kullanıcı bu postu beğenmiş
+                                holder.imageViewLike.setColorFilter(Color.RED);
                             }
+                        } else {
+                            // Hata oluştu
+                            System.out.println("Hata: " + task.getException());
                         }
-                    });
+                    }
+                });
 
 
-        }
+    }
+    private void showCommentsDialog(int position) {
+        // Seçilen gönderiye ait yorumları Firebase'den al ve CommentsDialog'u başlat
+        Post post = posts.get(position);
 
 
-}
+
+        db.collection("comments")
+                .whereEqualTo("postId", post.id).orderBy("timestamp", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        ArrayList<Comment> comments = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                            Comment comment = document.toObject(Comment.class);
+                            System.out.println(comment);
+                            comments.add(comment);
+
+
+                        }
+
+
+
+                        // CommentsDialog'u başlat
+
+                        CommentsDialog commentsDialog = new CommentsDialog(context, comments,post.id,post,PostAdapter.this,position);
+                        commentsDialog.show();
+
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Hata durumunda yapılacak işlemler
+                        Toast.makeText(context, "Yorumları alırken hata oluştu", Toast.LENGTH_SHORT).show();
+                        System.out.println(e.getMessage());
+                    }
+                });
+    }}
+
+
