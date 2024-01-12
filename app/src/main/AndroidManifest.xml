@@ -17,6 +17,12 @@
         android:theme="@style/Theme.ChatInstaBlog"
         tools:targetApi="31">
         <activity
+            android:name=".Activities.WorldActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities.UserProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activities.MyProfileActivity"
             android:exported="false" />
         <activity

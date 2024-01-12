@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -41,7 +40,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeActivity extends AppCompatActivity {
+public class WorldActivity extends AppCompatActivity {
 
     FirebaseAuth auth;
 
@@ -64,97 +63,58 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_world);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        Toolbar toolbar = findViewById(R.id.toolbar_home);
+        Toolbar toolbar = findViewById(R.id.toolbar_world);
 
-        // ActionBar olarak kullan
         setSupportActionBar(toolbar);
 
-
-
-        // ActionBar'ın geri butonunu göster
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        drawerLayout = findViewById(R.id.my_drawer_layout);
+        drawerLayout = findViewById(R.id.world_drawer_layout);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.nav_open, R.string.nav_close);
 
         drawerLayout.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
 
-        // to make the Navigation drawer icon always appear on the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        navigationView = findViewById(R.id.worldNavView);
 
-        navigationView = findViewById(R.id.homeNavView);
-
-
-        /*nav viewin headerindekileri veritabanından alma*/
         getNavViewHeaders();
 
-
-
-
-
-        recyclerView = findViewById(R.id.recyclerViewHomePosts);
+        recyclerView = findViewById(R.id.recyclerViewWorldPosts);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         db = FirebaseFirestore.getInstance();
 
-
         // Kullanıcının takip ettiği kullanıcıların ID'lerini içeren liste
         List<String> followingUserIds = new ArrayList<>();
 
-// Kullanıcının takip ettiği kullanıcıların ID'lerini Firestore'dan çekme
-        db.collection("Followings")
-                .whereEqualTo("followerId", auth.getCurrentUser().getUid())
+        db.collection("Posts").orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                        Following following = documentSnapshot.toObject(Following.class);
-                        followingUserIds.add(following.followingId);
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        System.out.println("postlar cekildi");
+                        List<Post> posts = new ArrayList<>();
+                        for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+
+                            Post post = documentSnapshot.toObject(Post.class);
+                            post.id = documentSnapshot.getId();
+
+                            posts.add(post);
+
+
+
+                        }
+                        System.out.println("postlar aktarıldı arrayliste");
+                        PostAdapter adapter = new PostAdapter(posts);
+                        recyclerView.setAdapter(adapter);
                     }
-
-                    // Kullanıcının takip ettiği kullanıcıların gönderilerini çek
-                    if (followingUserIds.isEmpty()) {
-                        // Takip edilen kimse yoksa ekranda bir mesaj göster
-                        Toast.makeText(HomeActivity.this, "Görünüşe göre takip listende kimse yok. Hemen Takibe başla!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(HomeActivity.this,WorldActivity.class);
-                        startActivity(intent);
-                        finish();
-
-                    } else {
-                        db.collection("Posts")
-                                .whereIn("userId", followingUserIds)
-                                .orderBy("timestamp", Query.Direction.DESCENDING)
-                                .get()
-                                .addOnSuccessListener(queryDocumentSnapshots1 -> {
-                                    List<Post> posts = new ArrayList<>();
-                                    for (QueryDocumentSnapshot documentSnapshot1 : queryDocumentSnapshots1) {
-                                        Post post = documentSnapshot1.toObject(Post.class);
-                                        post.id = documentSnapshot1.getId();
-                                        posts.add(post);
-                                    }
-
-                                    // Gönderileri RecyclerView'da göster
-                                    PostAdapter adapter = new PostAdapter(posts);
-                                    recyclerView.setAdapter(adapter);
-                                })
-                                .addOnFailureListener(e -> {
-                                    // Hata durumunda yapılacak işlemler
-                                    Toast.makeText(HomeActivity.this, "Gönderileri çekerken hata oluştu", Toast.LENGTH_SHORT).show();
-                                    Log.e("TAG", "Error getting posts: " + e.getMessage());
-                                });
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    // Hata durumunda yapılacak işlemler
-                    Toast.makeText(HomeActivity.this, "Takip edilen kullanıcıları çekerken hata oluştu", Toast.LENGTH_SHORT).show();
-                    Log.e("TAG", "Error getting following users: " + e.getMessage());
                 });
-
 
         // NavigationView'a bir Listener ekle
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -165,12 +125,6 @@ public class HomeActivity extends AppCompatActivity {
 
                 if (id == R.id.nav_logout) {
                     logout();
-                    //Toast.makeText(HomeActivity.this, "Nav Item 1 Tıklandı", Toast.LENGTH_SHORT).show();
-                }
-                if(id == R.id.nav_world){
-                    Intent intent = new Intent(HomeActivity.this,WorldActivity.class);
-                    startActivity(intent);
-                    finish();
                 }
                 if(id == R.id.nav_add_post){
                     goToAddPostActivity();
@@ -179,20 +133,11 @@ public class HomeActivity extends AppCompatActivity {
                     goToMyProfileActivity();
                 }
 
-
                 drawerLayout.closeDrawer(GravityCompat.START);
 
                 return true;
             }
-
-
         });
-    }
-
-    public void goToMyProfileActivity() {
-        Intent intent = new Intent(HomeActivity.this,MyProfileActivity.class);
-        startActivity(intent);
-        finish();
     }
 
     @Override
@@ -212,13 +157,18 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void goToAddPostActivity(){
-        Intent intent = new Intent(HomeActivity.this,AddPostActivity.class);
+        Intent intent = new Intent(WorldActivity.this, AddPostActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    public void goToMyProfileActivity(){
+        Intent intent = new Intent(WorldActivity.this, MyProfileActivity.class);
         startActivity(intent);
         finish();
     }
 
     public void getNavViewHeaders(){
-
         headerView = navigationView.getHeaderView(0);
         navUserName = headerView.findViewById(R.id.nav_user_name);
         navUserPhoto = headerView.findViewById(R.id.nav_user_photo);
@@ -226,7 +176,6 @@ public class HomeActivity extends AppCompatActivity {
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String uid = currentUser.getUid();
-        System.out.println("userid : " + uid);
 
         DocumentReference docRef = db.collection("Users").document(uid);
 
@@ -238,21 +187,14 @@ public class HomeActivity extends AppCompatActivity {
 
                     if(document.exists()){
                         User user = document.toObject(User.class);
-                        System.out.println(user);
                         navUserName.setText(user.UserName);
                         navUserEmail.setText(user.Email);
-                        Glide.with(HomeActivity.this).load(user.ProfileImgUrl).into(navUserPhoto);
+                        Glide.with(WorldActivity.this).load(user.ProfileImgUrl).into(navUserPhoto);
                     }
-
-
-
-
-
                 } else {
-                    System.out.println("get failed with "+ task.getException());
+                    Log.e("TAG", "Error getting user data: " + task.getException());
                 }
             }
         });
-
     }
 }

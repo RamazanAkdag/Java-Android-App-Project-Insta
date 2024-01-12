@@ -17,8 +17,17 @@
         <menu>
             <item
                 android:id="@+id/nav_profile"
-                android:icon="@drawable/send_icon"
+                android:icon="@drawable/profile_icon"
                 android:title="Profile" />
+            <item
+                android:id="@+id/nav_world"
+                android:icon="@drawable/world_icon"
+                android:title="World" />
+
+            <item
+                android:id="@+id/nav_to_home_activity"
+                android:icon="@drawable/home_icon"
+                android:title="Home" />
             <item
                 android:id="@+id/nav_add_post"
                 android:icon="@drawable/share_icon"

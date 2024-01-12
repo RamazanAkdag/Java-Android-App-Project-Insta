@@ -3,6 +3,7 @@ package com.example.chatinstablog.Adapters;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.chatinstablog.Activities.MyProfileActivity;
+import com.example.chatinstablog.Activities.UserProfileActivity;
 import com.example.chatinstablog.Models.Comment;
 import com.example.chatinstablog.Models.CommentsDialog;
 import com.example.chatinstablog.Models.LikeView;
@@ -126,6 +129,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                     }
                 });
 
+
                 holder.textViewLikes.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -141,6 +145,27 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                         // Yorumları gösteren bir diyalog penceresi oluştur
                         int position = holder.getAdapterPosition();
                         showCommentsDialog(position);
+                    }
+                });
+
+                holder.textViewUsername.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //postun içindeki userid userprofile a gönder başlat
+                        int position=holder.getAdapterPosition();
+                        Post post = posts.get(position);
+                        Intent intent;
+                        //kullanıcının dokunduğu post kendisininse myprofile a gidecek
+                        if (post.userId.equals(firebaseAuth.getCurrentUser().getUid())){
+                            intent = new Intent(context, MyProfileActivity.class);
+                            context.startActivity(intent);
+                        }else{
+                            intent = new Intent(context, UserProfileActivity.class);
+                            intent.putExtra("userId",post.userId);
+                            context.startActivity(intent);
+                        }
+
+
                     }
                 });
 
