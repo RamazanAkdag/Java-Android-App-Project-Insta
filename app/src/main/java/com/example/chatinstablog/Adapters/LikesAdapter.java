@@ -16,13 +16,10 @@ import com.example.chatinstablog.R;
 import java.util.List;
 
 public class LikesAdapter extends RecyclerView.Adapter<LikesAdapter.LikesViewHolder> {
-
     private List<LikeView> likes;
-
     public LikesAdapter(List<LikeView> likes) {
         this.likes = likes;
     }
-
     @NonNull
     @Override
     public LikesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -30,7 +27,6 @@ public class LikesAdapter extends RecyclerView.Adapter<LikesAdapter.LikesViewHol
                 .inflate(R.layout.recyclerview_like_item, parent, false);
         return new LikesViewHolder(view);
     }
-
     @Override
     public void onBindViewHolder(@NonNull LikesViewHolder holder, int position) {
         LikeView like = likes.get(position);
@@ -41,19 +37,14 @@ public class LikesAdapter extends RecyclerView.Adapter<LikesAdapter.LikesViewHol
                 .into(holder.imageViewLikesProfile);
 
     }
-
     @Override
     public int getItemCount() {
         return likes.size();
     }
 
     public class LikesViewHolder extends RecyclerView.ViewHolder {
-
         public ImageView imageViewLikesProfile;
         public TextView textViewLikesUsername;
-
-
-
 
         public LikesViewHolder(@NonNull View itemView) {
             super(itemView);

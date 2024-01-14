@@ -13,7 +13,11 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.ImageDecoder;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -122,6 +126,32 @@ public class RegisterActivity extends AppCompatActivity {
                 if (task.isSuccessful()){
                     if (imageUri != null){
                         addProfilePicture(task.getResult().getUser().getUid(),imageUri);
+                    }else{
+                        // Vektör drawable'ı al
+                        Drawable drawable = getResources().getDrawable(R.drawable.person_image);
+                        VectorDrawable vectorDrawable = (VectorDrawable) drawable;
+
+                        // Bitmap oluştur
+                        Bitmap bitmap = Bitmap.createBitmap(
+                                vectorDrawable.getIntrinsicWidth(),
+                                vectorDrawable.getIntrinsicHeight(),
+                                Bitmap.Config.ARGB_8888
+                        );
+
+                        // Bitmap üzerine vektörü çiz
+                        Canvas canvas = new Canvas(bitmap);
+                        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                        vectorDrawable.draw(canvas);
+
+
+                        // Bitmap'i Uri'ye çevir
+                        String path = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "Varsayılan Resim", null);
+                        Uri defaultImageUri = Uri.parse(path);
+
+
+                        // Drawable'ı al
+                        addProfilePicture(task.getResult().getUser().getUid(),defaultImageUri);
+
                     }
                 }else {
                     Toast.makeText(RegisterActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();

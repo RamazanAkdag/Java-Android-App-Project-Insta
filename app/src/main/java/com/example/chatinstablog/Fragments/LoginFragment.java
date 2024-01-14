@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import com.example.chatinstablog.Activities.ForgotPasswordActivity;
 import com.example.chatinstablog.Activities.HomeActivity;
 import com.example.chatinstablog.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -54,7 +55,8 @@ public class LoginFragment extends Fragment {
         textViewForgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Şifreni mi unuttun işlemi için gerekli kodu buraya ekle
+                Intent intent = new Intent(container.getContext(), ForgotPasswordActivity.class);
+                startActivity(intent);
             }
         });
 

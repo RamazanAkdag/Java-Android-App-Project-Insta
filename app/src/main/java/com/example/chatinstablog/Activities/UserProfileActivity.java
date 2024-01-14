@@ -45,7 +45,7 @@ import java.util.List;
 
 public class UserProfileActivity extends AppCompatActivity {
 
-    private ActivityUserProfileBinding binding;
+
 
     User user;
     User currentUser;
@@ -68,6 +68,8 @@ public class UserProfileActivity extends AppCompatActivity {
 
     PostAdapter postAdapter; // PostAdapter'ı tanımla
     List<Post> userPosts = new ArrayList<>(); // Kullanıcının gönderilerini tutacak liste
+
+    private ActivityUserProfileBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

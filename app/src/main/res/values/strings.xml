@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ChatInstaBlog</string>
+    <string name="app_name">Fotoroman</string>
 
     <!-- to toggle the open close button of the navigation drawer -->
     <string name="nav_open">Open</string>
